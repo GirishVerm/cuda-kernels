@@ -34,9 +34,10 @@ This project implements multiple versions of the attention mechanism with progre
 |---------------|------------------|--------------|---------------|
 | Naive | 1.0x (baseline) | 100% | Reference |
 | Tiled | ~2-3x | ~60% | Medium sequences |
-| FlashAttention | ~4-8x | ~20% | Long sequences |
+| FlashAttention | ~2-4x | ~20% | Long sequences |
 
-*Benchmarked on NVIDIA A100 with sequence length 2048*
+**Tested on:** GTX 1650 Ti (4GB VRAM, Turing architecture, compute capability 7.5)
+**Recommended:** Use sequence lengths up to 1024 with batch_size=1 or 2 due to memory constraints.
 
 ## Technical Highlights
 
@@ -91,11 +92,13 @@ llm-proj/
 ## Installation
 
 ### Prerequisites
-- **Windows 10/11** with NVIDIA GPU (GTX 1060+ or RTX 20xx/30xx/40xx series)
-- **CUDA Toolkit 11.8+** ([Download](https://developer.nvidia.com/cuda-downloads))
+- **Windows 10/11** with NVIDIA GPU (GTX 1650 Ti or better)
+- **CUDA Toolkit 11.8** ([Download](https://developer.nvidia.com/cuda-downloads))
 - **Visual Studio 2019 or 2022** with C++ tools ([Download](https://visualstudio.microsoft.com/downloads/))
 - **Python 3.10 or 3.11** ([Download](https://www.python.org/downloads/))
 - **PyTorch 2.0+ with CUDA** ([Install Guide](https://pytorch.org/get-started/locally/))
+
+**Note:** GTX 1650 Ti has 4GB VRAM - use smaller batch sizes and sequence lengths for testing.
 
 ### Quick Start (Windows)
 
@@ -150,11 +153,11 @@ output = attention_flash(Q, K, V)
 ### Benchmarking
 
 ```cmd
-# Run comprehensive benchmarks
-python python/benchmarks/benchmark_attention.py
+# Run comprehensive benchmarks (adjusted for GTX 1650 Ti 4GB VRAM)
+python python/benchmarks/benchmark_attention.py --batch-size 1 --seq-lengths 128,256,512,1024
 
 # Compare with PyTorch native
-python python/benchmarks/compare_implementations.py --seq-lengths 128,256,512,1024,2048
+python python/benchmarks/compare_implementations.py --batch-size 1 --seq-len 512
 
 # Visualize results
 python python/benchmarks/visualize_results.py

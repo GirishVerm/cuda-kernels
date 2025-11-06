@@ -17,12 +17,12 @@ extra_compile_args = {
         '--generate-line-info',
         '-Xptxas=-v',
         '-Xcompiler=-fPIC',
-        # Optimize for modern architectures
-        '-gencode=arch=compute_70,code=sm_70',  # V100
-        '-gencode=arch=compute_75,code=sm_75',  # RTX 20xx
-        '-gencode=arch=compute_80,code=sm_80',  # A100
-        '-gencode=arch=compute_86,code=sm_86',  # RTX 30xx
-        '-gencode=arch=compute_89,code=sm_89',  # RTX 40xx
+        # Optimize for GTX 1650 Ti and other architectures
+        '-gencode=arch=compute_75,code=sm_75',  # GTX 1650 Ti, RTX 20xx (Turing)
+        '-gencode=arch=compute_70,code=sm_70',  # V100 (Volta)
+        '-gencode=arch=compute_80,code=sm_80',  # A100, RTX 30xx (Ampere)
+        '-gencode=arch=compute_86,code=sm_86',  # RTX 30xx (Ampere)
+        '-gencode=arch=compute_89,code=sm_89',  # RTX 40xx (Ada)
     ]
 }
 

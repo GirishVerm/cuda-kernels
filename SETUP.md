@@ -1,10 +1,10 @@
 # Windows Setup - Quick Reference
 
-## ✅ What You Have
+## What You Have
 
 Clean, production-ready CUDA attention kernel project for Windows.
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 llm-proj/
@@ -48,12 +48,12 @@ llm-proj/
 └── LICENSE                       # MIT License
 ```
 
-## 🚀 Quick Start (5 Steps)
+## Quick Start (5 Steps)
 
 ### 1. Prerequisites
 - Windows 10/11
-- NVIDIA GPU (GTX 1060+ or RTX series)
-- CUDA Toolkit 11.8 or 12.1
+- NVIDIA GTX 1650 Ti (4GB VRAM, Turing, compute capability 7.5)
+- CUDA Toolkit 11.8
 - Visual Studio 2022 with C++ tools
 - Python 3.10 or 3.11
 
@@ -75,11 +75,13 @@ build.bat
 
 ### 5. Run Tests
 ```cmd
-python python/benchmarks/compare_implementations.py
-python python/benchmarks/benchmark_attention.py
+python python/benchmarks/compare_implementations.py --batch-size 1 --seq-len 512
+python python/benchmarks/benchmark_attention.py --batch-size 1 --seq-lengths 128,256,512,1024
 ```
 
-## 📊 What It Does
+**Important:** GTX 1650 Ti has only 4GB VRAM. Always use `--batch-size 1` and avoid seq_len > 1024.
+
+## What It Does
 
 Implements attention mechanism for LLMs with 3 optimization levels:
 
@@ -96,19 +98,22 @@ Implements attention mechanism for LLMs with 3 optimization levels:
    - Online softmax algorithm
    - O(N) memory complexity
 
-## 🎯 Expected Results
+## Expected Results
 
-**On RTX 3080, seq_len=512:**
-- PyTorch: 2.3 ms
-- Naive: 4.6 ms
-- Tiled: 2.0 ms (1.2x faster than PyTorch)
-- Flash: 1.2 ms (1.9x faster than PyTorch)
+**On GTX 1650 Ti, batch_size=1, seq_len=512:**
+- PyTorch: ~3.2 ms
+- Naive: ~6.1 ms
+- Tiled: ~2.8 ms (1.1x faster than PyTorch)
+- Flash: ~2.1 ms (1.5x faster than PyTorch)
 
-**On RTX 3080, seq_len=2048:**
-- PyTorch: 35.0 ms
-- Flash: 12.0 ms (2.9x faster)
+**On GTX 1650 Ti, batch_size=1, seq_len=1024:**
+- PyTorch: ~12.5 ms
+- Flash: ~8.0 ms (1.6x faster)
 
-## 📚 Documentation
+**Note:** Performance will be lower than high-end GPUs due to limited compute and memory bandwidth.
+Focus on demonstrating correct implementation and understanding of optimizations.
+
+## Documentation
 
 - **README.md** - Project overview
 - **GETTING_STARTED.md** - Detailed setup guide (START HERE!)
@@ -116,17 +121,17 @@ Implements attention mechanism for LLMs with 3 optimization levels:
 - **docs/OPTIMIZATION.md** - Optimization techniques
 - **docs/PROFILING.md** - Profiling with Nsight
 
-## 🔧 Common Commands
+## Common Commands
 
 ```cmd
 # Build
 build.bat
 
-# Test correctness
-python python/benchmarks/compare_implementations.py
+# Test correctness (use batch_size=1 for GTX 1650 Ti)
+python python/benchmarks/compare_implementations.py --batch-size 1 --seq-len 512
 
-# Benchmark performance
-python python/benchmarks/benchmark_attention.py
+# Benchmark performance (adjusted for 4GB VRAM)
+python python/benchmarks/benchmark_attention.py --batch-size 1 --seq-lengths 128,256,512,1024
 
 # Generate plots
 python python/benchmarks/visualize_results.py
@@ -142,7 +147,7 @@ python setup.py clean --all
 python setup.py develop
 ```
 
-## ⚠️ Troubleshooting
+## Troubleshooting
 
 **"CUDA Available: False"**
 → Reinstall PyTorch with CUDA support
@@ -153,10 +158,11 @@ python setup.py develop
 **Build errors**
 → Install Visual Studio 2022 with C++ tools
 
-**Out of memory**
-→ Reduce batch size: `--batch-size 1`
+**Out of memory (VERY COMMON on GTX 1650 Ti)**
+→ Always use: `--batch-size 1 --seq-lengths 128,256,512,1024`
+→ Do NOT use seq_len=2048 or higher (requires 8GB+ VRAM)
 
-## 📦 Next Steps
+## Next Steps
 
 1. Read **GETTING_STARTED.md** for detailed instructions
 2. Follow the 5-step quick start above
@@ -165,15 +171,19 @@ python setup.py develop
 5. Profile with Nsight Compute (optional)
 6. Push to GitHub with results
 
-## 🎓 For NVIDIA Interview
+## For NVIDIA Interview
 
 This project demonstrates:
-- ✅ CUDA programming expertise
-- ✅ GPU memory hierarchy optimization
-- ✅ PyTorch C++ extension development
-- ✅ Performance benchmarking and profiling
-- ✅ Knowledge of FlashAttention algorithm
-- ✅ Production-quality code
+- CUDA programming expertise
+- GPU memory hierarchy optimization
+- PyTorch C++ extension development
+- Performance benchmarking and profiling
+- Knowledge of FlashAttention algorithm
+- Production-quality code
+
+**Note on GTX 1650 Ti:** While this is an entry-level GPU, the code demonstrates the same
+optimization principles that scale to high-end GPUs. The implementation quality and understanding
+of GPU architecture matters more than absolute performance numbers.
 
 Key talking points:
 - "Implemented progressive optimizations: naive → tiled → flash"

@@ -144,9 +144,9 @@ def profile_memory_usage(
 
 def main():
     parser = argparse.ArgumentParser(description='Profile attention kernels')
-    parser.add_argument('--batch-size', type=int, default=2)
+    parser.add_argument('--batch-size', type=int, default=1, help='Batch size (default=1 for GTX 1650 Ti)')
     parser.add_argument('--num-heads', type=int, default=8)
-    parser.add_argument('--seq-len', type=int, default=512)
+    parser.add_argument('--seq-len', type=int, default=512, help='Sequence length (max 1024 for GTX 1650 Ti)')
     parser.add_argument('--head-dim', type=int, default=64)
     parser.add_argument('--output-dir', type=str, default='profiling_results')
     parser.add_argument('--impl', type=str, choices=['all', 'naive', 'tiled', 'flash'],

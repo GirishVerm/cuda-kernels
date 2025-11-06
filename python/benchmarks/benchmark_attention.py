@@ -153,10 +153,10 @@ def benchmark_suite(
 
 def main():
     parser = argparse.ArgumentParser(description='Benchmark attention implementations')
-    parser.add_argument('--batch-size', type=int, default=2, help='Batch size')
+    parser.add_argument('--batch-size', type=int, default=1, help='Batch size (default=1 for GTX 1650 Ti)')
     parser.add_argument('--num-heads', type=int, default=8, help='Number of attention heads')
-    parser.add_argument('--seq-lengths', type=str, default='128,256,512,1024,2048',
-                       help='Comma-separated sequence lengths to benchmark')
+    parser.add_argument('--seq-lengths', type=str, default='128,256,512,1024',
+                       help='Comma-separated sequence lengths (default adjusted for GTX 1650 Ti 4GB VRAM)')
     parser.add_argument('--head-dim', type=int, default=64, help='Head dimension')
     parser.add_argument('--num-warmup', type=int, default=10, help='Warmup iterations')
     parser.add_argument('--num-iterations', type=int, default=100, help='Benchmark iterations')

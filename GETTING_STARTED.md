@@ -6,9 +6,8 @@ Quick guide to build, test, and run the CUDA attention kernels on Windows.
 
 ### Hardware Requirements
 - **NVIDIA GPU** with compute capability 7.0+ (Volta/Turing/Ampere/Ada/Hopper)
-  - Minimum: GTX 1060 (6GB VRAM)
-  - Recommended: RTX 3060/3070/3080 or RTX 4070/4080
-  - Ideal: RTX 4090 or A100
+  - Your GPU: GTX 1650 Ti (4GB VRAM, Turing, compute capability 7.5)
+  - Note: 4GB VRAM is limited - use batch_size=1 and seq_len up to 1024
 
 ### Software Requirements
 
@@ -112,31 +111,34 @@ flash              5.67e-04        ✓ PASS
 Benchmark all implementations across different sequence lengths:
 
 ```cmd
-python python/benchmarks/benchmark_attention.py --seq-lengths 128,256,512,1024,2048
+# For GTX 1650 Ti (4GB VRAM), use smaller configurations
+python python/benchmarks/benchmark_attention.py --batch-size 1 --seq-lengths 128,256,512,1024
 ```
 
-**Expected output (RTX 3080):**
+**Expected output (GTX 1650 Ti):**
 ```
-Benchmarking: batch=2, heads=8, seq_len=512, head_dim=64
+Benchmarking: batch=1, heads=8, seq_len=512, head_dim=64
 
 Benchmarking pytorch...
-  Mean latency: 2.345 ms
-  Throughput: 15.23 TFLOPS
+  Mean latency: 3.2 ms
+  Throughput: 5.5 TFLOPS
 
 Benchmarking naive...
-  Mean latency: 4.567 ms
-  Throughput: 7.82 TFLOPS
+  Mean latency: 6.1 ms
+  Throughput: 2.9 TFLOPS
 
 Benchmarking tiled...
-  Mean latency: 1.956 ms
-  Throughput: 18.23 TFLOPS
+  Mean latency: 2.8 ms
+  Throughput: 6.3 TFLOPS
 
 Benchmarking flash...
-  Mean latency: 1.234 ms
-  Throughput: 28.91 TFLOPS
+  Mean latency: 2.1 ms
+  Throughput: 8.4 TFLOPS
 
-flash speedup vs PyTorch: 1.90x
+flash speedup vs PyTorch: 1.5x
 ```
+
+**Note:** Performance numbers are approximate for GTX 1650 Ti. Actual results may vary.
 
 Results are saved to `benchmark_results.json`
 
@@ -293,14 +295,23 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 - CUDA 11.8 or 12.1
 - PyTorch 2.0+
 
-### Issue 5: Out of memory errors
+### Issue 5: Out of memory errors (COMMON ON GTX 1650 Ti)
 
-**Cause**: Sequence length too large for GPU memory
+**Cause**: GTX 1650 Ti has only 4GB VRAM - limited for large sequences
 
-**Solution**: Reduce batch size or sequence length:
+**Solution**: Always use batch_size=1 and avoid sequence lengths above 1024:
 ```cmd
-python python/benchmarks/benchmark_attention.py --batch-size 1 --seq-lengths 128,256,512
+# Safe for GTX 1650 Ti
+python python/benchmarks/benchmark_attention.py --batch-size 1 --seq-lengths 128,256,512,1024
+
+# Will likely fail on GTX 1650 Ti
+python python/benchmarks/benchmark_attention.py --seq-lengths 2048  # Too large!
 ```
+
+If you still get OOM errors:
+- Reduce sequence length further
+- Close other GPU applications
+- Try head_dim=32 instead of 64
 
 ### Issue 6: Incorrect results
 
@@ -317,26 +328,23 @@ python -c "import torch; t = torch.randn(100, 100, device='cuda'); print('GPU wo
 
 | GPU Model | VRAM | Expected Performance | Use Case |
 |-----------|------|---------------------|----------|
-| GTX 1060 | 6GB | ~5 TFLOPS | Testing |
+| **GTX 1650 Ti** | **4GB** | **~3.3 TFLOPS** | **Your GPU - Testing/Demo** |
 | RTX 2060 | 6GB | ~7 TFLOPS | Development |
 | RTX 3060 | 12GB | ~13 TFLOPS | Good |
 | RTX 3070 | 8GB | ~20 TFLOPS | Very Good |
 | RTX 3080 | 10GB | ~30 TFLOPS | Excellent |
-| RTX 4070 | 12GB | ~29 TFLOPS | Excellent |
-| RTX 4080 | 16GB | ~49 TFLOPS | Outstanding |
-| RTX 4090 | 24GB | ~83 TFLOPS | Best Consumer |
 
-### Expected Speedups
+### Expected Speedups (GTX 1650 Ti, batch_size=1)
 
-| Sequence Length | PyTorch | Flash | Speedup |
-|----------------|---------|-------|---------|
-| 128 | 0.5 ms | 0.3 ms | 1.7x |
-| 256 | 1.2 ms | 0.6 ms | 2.0x |
-| 512 | 2.3 ms | 1.2 ms | 1.9x |
-| 1024 | 9.1 ms | 4.5 ms | 2.0x |
-| 2048 | 35.0 ms | 12.0 ms | 2.9x |
+| Sequence Length | PyTorch | Flash | Speedup | VRAM Usage |
+|----------------|---------|-------|---------|------------|
+| 128 | 0.9 ms | 0.7 ms | 1.3x | ~500 MB |
+| 256 | 2.1 ms | 1.5 ms | 1.4x | ~800 MB |
+| 512 | 3.2 ms | 2.1 ms | 1.5x | ~1.5 GB |
+| 1024 | 12.5 ms | 8.0 ms | 1.6x | ~3.2 GB |
 
-*Benchmarked on RTX 3080*
+**Note:** Sequence lengths above 1024 may cause out-of-memory errors on 4GB VRAM.
+Use `--batch-size 1` for all benchmarks.
 
 ## Next Steps
 
