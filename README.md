@@ -1,12 +1,14 @@
 # FlashAttention CUDA Kernels: Custom Implementation
 
+## Yes this README is written by AI, cause AI writes better READMEs than I do!
+
 [![CUDA](https://img.shields.io/badge/CUDA-11.0%2B-76B900?logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A high-performance implementation of attention mechanisms for Large Language Models (LLMs) using custom CUDA kernels. This project demonstrates deep understanding of GPU architecture, memory optimization, and parallel programming techniques essential for efficient LLM inference.
 
-## 🎯 Project Overview
+## Project Overview
 
 This project implements multiple versions of the attention mechanism with progressive optimizations:
 
@@ -14,7 +16,7 @@ This project implements multiple versions of the attention mechanism with progre
 2. **Tiled Attention**: Optimized with shared memory and tiling strategies
 3. **FlashAttention-style**: Advanced implementation with IO-awareness and recomputation
 
-## 🚀 Key Features
+## Key Features
 
 - **Custom CUDA Kernels**: Hand-optimized kernels showcasing GPU programming expertise
 - **PyTorch Integration**: Seamless integration as PyTorch custom operators
@@ -26,7 +28,7 @@ This project implements multiple versions of the attention mechanism with progre
 - **Profiling Suite**: Integration with NVIDIA Nsight tools
 - **Performance Modeling**: Roofline analysis and bottleneck identification
 
-## 📊 Performance Highlights
+## Performance Highlights
 
 | Implementation | Relative Speedup | Memory Usage | Best Use Case |
 |---------------|------------------|--------------|---------------|
@@ -36,7 +38,7 @@ This project implements multiple versions of the attention mechanism with progre
 
 *Benchmarked on NVIDIA A100 with sequence length 2048*
 
-## 🛠️ Technical Highlights
+## Technical Highlights
 
 ### GPU Optimization Techniques
 - Memory coalescing for efficient global memory access
@@ -52,7 +54,7 @@ This project implements multiple versions of the attention mechanism with progre
 - Bank conflict avoidance in shared memory
 - Cooperative groups for flexible parallelism
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 llm-proj/
@@ -86,7 +88,7 @@ llm-proj/
 └── README.md
 ```
 
-## 🔧 Installation
+## Installation
 
 ### Prerequisites
 - **Windows 10/11** with NVIDIA GPU (GTX 1060+ or RTX 20xx/30xx/40xx series)
@@ -123,7 +125,7 @@ pytest tests/ -v
 build.bat
 ```
 
-## 💻 Usage
+## Usage
 
 ### Basic Usage
 
@@ -168,7 +170,7 @@ ncu --set full --target-processes all python python/profiling/profile_kernels.py
 nsys profile --trace=cuda,nvtx python python/profiling/profile_kernels.py
 ```
 
-## 📈 Benchmarking Results
+## Benchmarking Results
 
 ### Throughput vs Sequence Length
 ![Throughput Comparison](docs/images/throughput_comparison.png)
@@ -179,7 +181,7 @@ nsys profile --trace=cuda,nvtx python python/profiling/profile_kernels.py
 ### Latency Analysis
 ![Latency](docs/images/latency_analysis.png)
 
-## 🧪 Testing
+## Testing
 
 ```cmd
 # Run all tests
@@ -192,13 +194,13 @@ pytest tests/test_correctness.py -v
 pytest tests/test_gradients.py -v
 ```
 
-## 📚 Documentation
+## Documentation
 
 - [Design Decisions](docs/DESIGN.md) - Architecture and design choices
 - [Optimization Techniques](docs/OPTIMIZATION.md) - Detailed optimization explanations
 - [Profiling Guide](docs/PROFILING.md) - How to profile and analyze performance
 
-## 🎓 Learning Resources
+## Learning Resources
 
 This project demonstrates concepts from:
 - [FlashAttention Paper](https://arxiv.org/abs/2205.14135)
@@ -206,7 +208,7 @@ This project demonstrates concepts from:
 - NVIDIA CUDA Programming Guide
 - GPU Performance Optimization Techniques
 
-## 🏗️ Implementation Details
+## Implementation Details
 
 ### Naive Attention
 - Direct implementation of scaled dot-product attention
@@ -224,7 +226,7 @@ This project demonstrates concepts from:
 - Recomputes attention scores in backward pass
 - Achieves sub-linear memory complexity
 
-## 🔬 Key Optimizations Explained
+## Key Optimizations Explained
 
 ### 1. Memory Coalescing
 ```cuda
@@ -245,16 +247,16 @@ __shared__ float K_tile[BLOCK_SIZE][HEAD_DIM];
 float sum = warpReduceSum(val);
 ```
 
-## 🎯 Skills Demonstrated
+## Skills Demonstrated
 
-✅ **CUDA Programming**: Custom kernel development with advanced optimizations  
-✅ **GPU Architecture**: Deep understanding of memory hierarchy and execution model  
-✅ **PyTorch Integration**: C++/CUDA extensions with autograd support  
-✅ **Performance Engineering**: Profiling, bottleneck analysis, and optimization  
-✅ **Deep Learning**: Understanding of transformer architecture and attention  
-✅ **Software Engineering**: Clean code, testing, documentation, and benchmarking  
+**CUDA Programming**: Custom kernel development with advanced optimizations  
+**GPU Architecture**: Deep understanding of memory hierarchy and execution model  
+**PyTorch Integration**: C++/CUDA extensions with autograd support  
+**Performance Engineering**: Profiling, bottleneck analysis, and optimization  
+**Deep Learning**: Understanding of transformer architecture and attention  
+**Software Engineering**: Clean code, testing, documentation, and benchmarking  
 
-## 🚧 Future Enhancements
+## Future Enhancements
 
 - [ ] Multi-query attention (MQA) and Grouped-query attention (GQA)
 - [ ] Support for causal masking and attention bias
@@ -263,22 +265,14 @@ float sum = warpReduceSum(val);
 - [ ] TensorRT plugin integration
 - [ ] Triton backend support
 
-## 📝 License
 
-MIT License - see [LICENSE](LICENSE) file for details
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Inspired by:
 - FlashAttention by Dao et al.
 - PyTorch CUDA extension tutorials
 - NVIDIA's CUTLASS library
-
-## 📧 Contact
-
-**Girish Verma**  
-[GitHub](https://github.com/yourusername) | [LinkedIn](https://linkedin.com/in/yourprofile)
-
 ---
 
 *This project was created to demonstrate expertise in GPU programming, performance optimization, and deep learning systems for LLM inference applications.*
