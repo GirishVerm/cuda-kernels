@@ -3,6 +3,19 @@ import sys
 from setuptools import setup, find_packages
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
+# Monkey-patch to bypass CUDA version check for CUDA 13.0
+import torch.utils.cpp_extension as cpp_ext
+_original_check_cuda_version = cpp_ext._check_cuda_version
+def _patched_check_cuda_version(compiler_name, compiler_version):
+    try:
+        return _original_check_cuda_version(compiler_name, compiler_version)
+    except RuntimeError as e:
+        if "CUDA version" in str(e) and "mismatches" in str(e):
+            print(f"Warning: Bypassing CUDA version check: {e}")
+            return
+        raise
+cpp_ext._check_cuda_version = _patched_check_cuda_version
+
 # Read README for long description
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -17,6 +30,8 @@ extra_compile_args = {
         '--generate-line-info',
         '-Xptxas=-v',
         '-Xcompiler=-fPIC',
+        '--allow-unsupported-compiler',  # Allow newer Visual Studio versions
+        '-D_MSVC_LANG=201703L',  # Workaround for VS 2022 STL version check
         # Optimize for GTX 1650 Ti and other architectures
         '-gencode=arch=compute_75,code=sm_75',  # GTX 1650 Ti, RTX 20xx (Turing)
         '-gencode=arch=compute_70,code=sm_70',  # V100 (Volta)

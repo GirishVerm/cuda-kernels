@@ -2,9 +2,10 @@
 
 ## Yes this README is written by AI, cause AI writes better READMEs than I do!
 
-[![CUDA](https://img.shields.io/badge/CUDA-11.0%2B-76B900?logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C?logo=pytorch)](https://pytorch.org/)
+[![CUDA](https://img.shields.io/badge/CUDA-12.4-76B900?logo=nvidia)](https://developer.nvidia.com/cuda-toolkit)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.5.1%2Bcu121-EE4C2C?logo=pytorch)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D4?logo=windows)](https://www.microsoft.com/windows)
 
 A high-performance implementation of attention mechanisms for Large Language Models (LLMs) using custom CUDA kernels. This project demonstrates deep understanding of GPU architecture, memory optimization, and parallel programming techniques essential for efficient LLM inference.
 
@@ -28,15 +29,46 @@ This project implements multiple versions of the attention mechanism with progre
 - **Profiling Suite**: Integration with NVIDIA Nsight tools
 - **Performance Modeling**: Roofline analysis and bottleneck identification
 
-## Performance Highlights
+## Performance Results (GTX 1650 Ti)
 
-| Implementation | Relative Speedup | Memory Usage | Best Use Case |
-|---------------|------------------|--------------|---------------|
-| Naive | 1.0x (baseline) | 100% | Reference |
-| Tiled | ~2-3x | ~60% | Medium sequences |
-| FlashAttention | ~2-4x | ~20% | Long sequences |
+Benchmark results from actual testing on NVIDIA GeForce GTX 1650 Ti (4GB VRAM):
 
-**Tested on:** GTX 1650 Ti (4GB VRAM, Turing architecture, compute capability 7.5)
+### Latency Comparison (ms)
+
+| Seq Len | PyTorch | Naive | Tiled | Flash |
+|---------|---------|-------|-------|-------|
+| 128     | 0.21    | 1.16  | 0.39  | 0.23  |
+| 256     | 0.24    | 4.67  | 1.94  | 0.75  |
+| 512     | 0.70    | 18.85 | 7.42  | 2.85  |
+| 1024    | 2.59    | 85.52 | 25.92 | 11.49 |
+
+### Speedup vs PyTorch
+
+| Seq Len | Naive | Tiled | Flash |
+|---------|-------|-------|-------|
+| 128     | 0.18x  | 0.53x  | 0.92x  |
+| 256     | 0.05x  | 0.12x  | 0.31x  |
+| 512     | 0.04x  | 0.09x  | 0.25x  |
+| 1024    | 0.03x  | 0.10x  | 0.23x  |
+
+### Memory Usage (batch_size=1, seq_len=512)
+
+| Implementation | Peak Memory (MB) | Overhead (MB) |
+|----------------|------------------|---------------|
+| PyTorch        | 28.12            | 25.12         |
+| Naive          | 21.12            | 18.12         |
+| Tiled          | 13.12            | 10.12         |
+| Flash          | 13.14            | 10.14         |
+
+**Note:** Custom kernels use less memory than PyTorch, but PyTorch's highly optimized implementation achieves better performance on this GPU. The naive implementation passes correctness tests, while tiled and flash implementations have known correctness issues that need debugging.
+
+**Tested on:** 
+- **GPU:** NVIDIA GeForce GTX 1650 Ti (4GB VRAM, Turing architecture, compute capability 7.5)
+- **CUDA:** 12.4
+- **PyTorch:** 2.5.1+cu121
+- **OS:** Windows 10/11
+- **Compiler:** Visual Studio 2022 Community with C++ tools
+
 **Recommended:** Use sequence lengths up to 1024 with batch_size=1 or 2 due to memory constraints.
 
 ## Technical Highlights
@@ -93,10 +125,14 @@ llm-proj/
 
 ### Prerequisites
 - **Windows 10/11** with NVIDIA GPU (GTX 1650 Ti or better)
-- **CUDA Toolkit 11.8** ([Download](https://developer.nvidia.com/cuda-downloads))
-- **Visual Studio 2019 or 2022** with C++ tools ([Download](https://visualstudio.microsoft.com/downloads/))
+- **CUDA Toolkit 12.4** ([Download](https://developer.nvidia.com/cuda-downloads))
+  - Required for Visual Studio 2022 compatibility
+  - Compatible with PyTorch CUDA 12.1 runtime
+- **Visual Studio 2022 Community** with C++ tools ([Download](https://visualstudio.microsoft.com/downloads/))
+  - Select "Desktop development with C++" workload during installation
 - **Python 3.10 or 3.11** ([Download](https://www.python.org/downloads/))
-- **PyTorch 2.0+ with CUDA** ([Install Guide](https://pytorch.org/get-started/locally/))
+- **PyTorch 2.5.1+ with CUDA 12.1** ([Install Guide](https://pytorch.org/get-started/locally/))
+  - Install with: `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121`
 
 **Note:** GTX 1650 Ti has 4GB VRAM - use smaller batch sizes and sequence lengths for testing.
 
@@ -108,16 +144,31 @@ nvidia-smi
 nvcc --version
 
 # 2. Install PyTorch with CUDA support
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # 3. Verify PyTorch CUDA
 python -c "import torch; print(f'CUDA Available: {torch.cuda.is_available()}')"
 
-# 4. Build the project
+# 4. Set up environment variables (in PowerShell)
+$env:CUDA_HOME = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.4"
+$env:PATH += ";C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.4\bin"
+$env:DISTUTILS_USE_SDK = "1"
+
+# 5. Set up Visual Studio environment
+$vsPath = "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
+cmd /c "`"$vsPath`" x64 >nul 2>&1 && set" | ForEach-Object { 
+    if ($_ -match '^([^=]+)=(.*)$') { 
+        $name = $matches[1]; $value = $matches[2]
+        [System.Environment]::SetEnvironmentVariable($name, $value, 'Process')
+        if ($name -eq 'PATH') { $env:PATH = $value }
+    }
+}
+
+# 6. Build the project
 pip install -r requirements.txt
 python setup.py develop
 
-# 5. Run tests
+# 7. Run tests
 pytest tests/ -v
 ```
 
@@ -140,8 +191,8 @@ from attention_cuda import (
     attention_flash
 )
 
-# Input tensors
-batch_size, num_heads, seq_len, head_dim = 2, 8, 512, 64
+# Input tensors (adjusted for GTX 1650 Ti 4GB VRAM)
+batch_size, num_heads, seq_len, head_dim = 1, 8, 512, 64
 Q = torch.randn(batch_size, num_heads, seq_len, head_dim, device='cuda')
 K = torch.randn(batch_size, num_heads, seq_len, head_dim, device='cuda')
 V = torch.randn(batch_size, num_heads, seq_len, head_dim, device='cuda')
@@ -175,27 +226,36 @@ nsys profile --trace=cuda,nvtx python python/profiling/profile_kernels.py
 
 ## Benchmarking Results
 
-### Throughput vs Sequence Length
-![Throughput Comparison](docs/images/throughput_comparison.png)
+Benchmark results are saved in `benchmark_results.json` and visualizations are generated in `benchmark_plots/`:
 
-### Memory Bandwidth Utilization
-![Memory Bandwidth](docs/images/memory_bandwidth.png)
+- `latency_comparison.png` - Latency comparison across implementations
+- `throughput_comparison.png` - Throughput (TFLOPS) analysis
+- `speedup_comparison.png` - Speedup relative to PyTorch
+- `latency_scaling.png` - Scaling behavior with sequence length
+- `summary_report.txt` - Text summary of results
 
-### Latency Analysis
-![Latency](docs/images/latency_analysis.png)
+To regenerate visualizations:
+```cmd
+python python/benchmarks/visualize_results.py --input benchmark_results.json --output-dir benchmark_plots
+```
 
 ## Testing
 
 ```cmd
 # Run all tests
-pytest tests/
+python -m pytest tests/ -v
 
 # Test correctness against PyTorch
-pytest tests/test_correctness.py -v
+python -m pytest tests/test_correctness.py -v
 
 # Test gradient computation
-pytest tests/test_gradients.py -v
+python -m pytest tests/test_gradients.py -v
 ```
+
+**Test Results:**
+- 14/16 tests pass
+- Naive implementation: All correctness and gradient tests pass
+- Tiled/Flash implementations: Correctness tests fail (known issues - kernels need debugging)
 
 ## Documentation
 

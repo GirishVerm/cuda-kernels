@@ -80,7 +80,7 @@ pip install -r requirements.txt
 python setup.py develop
 
 # 4. Verify installation
-python -c "import attention_cuda; print('✓ Installation successful!')"
+python -c "import attention_cuda; print('Installation successful!')"
 
 # 5. Run tests
 pytest tests/ -v
@@ -101,9 +101,9 @@ python python/benchmarks/compare_implementations.py
 CORRECTNESS COMPARISON
 Implementation      Max Error       Status    
 ---------------------------------------------
-naive              1.23e-04        ✓ PASS
-tiled              2.34e-04        ✓ PASS
-flash              5.67e-04        ✓ PASS
+naive              1.23e-04        [PASS]
+tiled              2.34e-04        [PASS]
+flash              5.67e-04        [PASS]
 ```
 
 ### 2. Run Benchmarks
@@ -409,4 +409,4 @@ This is a demonstration project for NVIDIA interview purposes. Improvements welc
 
 ---
 
-Happy optimizing! 🚀
+Happy optimizing!

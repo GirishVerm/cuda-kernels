@@ -54,11 +54,11 @@ def compare_correctness(
             output = func(Q, K, V)
             is_correct, max_error = check_correctness(output, reference)
             
-            status = "✓ PASS" if is_correct else "✗ FAIL"
+            status = "[PASS]" if is_correct else "[FAIL]"
             print(f"{name:<15} {max_error:<15.2e} {status:<10}")
             
         except Exception as e:
-            print(f"{name:<15} {'ERROR':<15} ✗ FAIL")
+            print(f"{name:<15} {'ERROR':<15} [FAIL]")
             print(f"  Error: {e}")
 
 

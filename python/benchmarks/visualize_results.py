@@ -284,7 +284,7 @@ def main():
     # Generate summary report
     generate_summary_report(results, output_dir)
     
-    print(f"\n✓ All visualizations generated successfully!")
+    print(f"\nAll visualizations generated successfully!")
 
 
 if __name__ == '__main__':
